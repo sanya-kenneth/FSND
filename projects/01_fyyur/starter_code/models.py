@@ -1,6 +1,8 @@
 # from app import app as app
 from flask_sqlalchemy import SQLAlchemy
 from flask import current_app as app
+from constants import searchable_fields
+import flask_whooshalchemyplus
 
 #----------------------------------------------------------------------------#
 # Models.
@@ -8,7 +10,28 @@ from flask import current_app as app
 
 db = SQLAlchemy()
 
-class Venue(db.Model):
+
+class BaseModel(object):
+    __searchable__ =  searchable_fields # indexed fields
+    """
+    Class for handling database operations
+    """
+    
+    def save(self):
+        """
+        Method for saving new data resource to the database
+        """
+        try:
+            db.session.add(self)
+            db.session.commit()
+        except:
+            db.session.rollback()
+            error=True
+        finally:
+            db.session.close()
+
+
+class Venue(db.Model, BaseModel):
     """
     Model class for creating and manipulating venue objects
     """
@@ -30,29 +53,13 @@ class Venue(db.Model):
     upcoming_shows = db.Column(db.PickleType) # Array dict objects for upcoming shows
     past_shows_count = db.Column(db.Integer, default=0)
     upcoming_shows_count = db.Column(db.Integer, default=0)
-    venue_shows = db.relationship('Show', backref='Venue', lazy=True)
-    
-    def __init__(self):
-        self.operate = DbOperations(self, db)
-        
+    venue_shows = db.relationship('Show', cascade='all, delete', backref='Venue', lazy=True)
+
     def __repr__(self):
-        return f"<Venue obj: {name}>"
-        
-    def save(self):
-        """
-        Add venue resource
-        """
-        self.operate.save()
-        
-    def delete(self):
-        """
-        Delete venue resource
-        """
-        self.operate.delete()
+        return f"<Venue obj: {self.name}>"
 
-    # TODO: implement any missing fields, as a database migration using Flask-Migrate
 
-class Artist(db.Model):
+class Artist(db.Model, BaseModel):
     """
     Model class for creating and manipulating artist objects
     """
@@ -73,93 +80,32 @@ class Artist(db.Model):
     upcoming_shows = db.Column(db.PickleType) # Array of dict objects for upcoming shows
     past_shows_count = db.Column(db.Integer, default=0)
     upcoming_shows_count = db.Column(db.Integer, default=0)
-    artist_shows = db.relationship('Show', backref='Artist', lazy=True)
+    artist_shows = db.relationship('Show', cascade='all, delete', backref='Artist', lazy=True)
     
-    def __init__(self):
-        self.operate = DbOperations(self, db)
-        
     def __repr__(self):
-        return f"<Artist obj: {name}>"
-        
-    def save(self):
-        """
-        Add artist resource
-        """
-        self.operate.save()
-        
-    def delete(self):
-        """
-        Delete artist resource
-        """
-        self.operate.delete()
-    
-class Show(db.Model):
+        return f"<Artist obj: {self.name}>"
+
+
+class Show(db.Model, BaseModel):
     """
     Model class for creating and manipulating show objects
     """
     __tablename__ = 'Show'
+    __searchable__ = []
     
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(120), nullable=False)
-    artist_id = db.Column(db.Integer, db.ForeignKey('Artist.id'), nullable=False)
-    venue_id = db.Column(db.Integer, db.ForeignKey('Venue.id'), nullable=False)
+    artist_id = db.Column(db.Integer, db.ForeignKey('Artist.id', ondelete='CASCADE'),
+                          nullable=False)
+    artist_image_link = db.Column(db.String(300))
+    artist_name = db.Column(db.String(120))
+    venue_id = db.Column(db.Integer, db.ForeignKey('Venue.id', ondelete='CASCADE'),
+                         nullable=False)
+    venue_name = db.Column(db.String(120))
     date = db.Column(db.DateTime, nullable=False)
     start_time = db.Column(db.String(120), nullable=False)
     end_time = db.Column(db.String(120), nullable=False)
     show_fee = db.Column(db.String(120), nullable=False)
     
-    def __init__(self):
-        self.operate = DbOperations(self, db)
-        
     def __repr__(self):
-        return f"<Show obj: {name}>"
-        
-    def save(self):
-        """
-        Add show resource
-        """
-        self.operate.save()
-        
-    def delete(self):
-        """
-        Delete show resource
-        """
-        self.operate.delete()
-    
-class DbOperations(object):
-    """
-    Class for handling database operations
-    """
-    def __init__(self, resource_instance, db):
-        self.resource_instance = resource_instance
-        self.db = db
-        
-    def save(self):
-        """
-        Method for saving new data resource to the database
-        """
-        try:
-            self.db.session.add(self.resource_instance)
-            self.db.session.commit()
-        except:
-            self.db.session.rollback()
-            error=True
-        finally:
-            self.db.session.close()
-            
-    def delete(self):
-        """
-        Method for deleting a data resource from the database
-        """
-        try:
-            self.db.session.delete(self.resource_instance)
-            self.db.session.commit()
-        except:
-            self.db.session.rollback()
-            error=True
-        finally:
-            self.db.session.close()
-
-    # TODO: implement any missing fields, as a database migration using Flask-Migrate
-
-# TODO Implement Show and Artist models, and complete all model relationships and properties, as a database migration.
+        return f"<Show obj: {self.name}>"

@@ -52,6 +52,284 @@ Setting the `FLASK_ENV` variable to `development` will detect file changes and r
 
 Setting the `FLASK_APP` variable to `flaskr` directs flask to use the `flaskr` directory and the `__init__.py` file to find the application. 
 
+
+## API ENDPOINTS
+
+#### Create a question
+- Creates a question for the game
+
+Method `POST`
+
+Status code `201`
+
+Route `{{Base_url}}/api/questions`
+
+Request body 
+
+```
+{
+	"question": "your question goes here",
+	"answer": "answer to the question",
+	"category": "question category",
+	"difficulty": integer number for difficulty
+}
+
+```
+
+#### Delete a question
+- Deletes a question in the game
+
+Method `DELETE`
+
+Status code `200`
+
+Route `{{Base_url}}/api/questions/<question_id>/delete`
+
+Response
+
+```
+{
+    "message": "question was deleted successfuly",
+    "success": true
+}
+
+```
+
+#### Get all questions
+- Gets all questions in the game
+- Questions fetched are paginated
+
+Method `GET`
+
+Status code `200`
+
+Route `{{Base_url}}/api/questions?page=<page_number>`
+
+Response 
+
+```
+{
+    "categories": [
+        {
+            "id": 1,
+            "type": "history"
+        },
+        {
+            "id": 2,
+            "type": "health"
+        },
+        {
+            "id": 3,
+            "type": "entertainment"
+        },
+        {
+            "id": 8,
+            "type": "sports"
+        },
+        
+    ],
+    "current_category": "",
+    "page": 1,
+    "questions": [
+        {
+            "answer": "He is cool",
+            "category": "1",
+            "difficulty": 1,
+            "id": 1,
+            "question": "Who is iron man?"
+        },
+        {
+            "answer": "USA",
+            "category": "1",
+            "difficulty": 1,
+            "id": 3,
+            "question": "Who was Clinton?"
+        },
+        {
+            "answer": "president",
+            "category": "1",
+            "difficulty": 1,
+            "id": 4,
+            "question": "Who is Trump?"
+        },
+        {
+            "answer": "music",
+            "category": "3",
+            "difficulty": 1,
+            "id": 5,
+            "question": "What is music?"
+        },
+        {
+            "answer": "soccer",
+            "category": "3",
+            "difficulty": 1,
+            "id": 6,
+            "question": "What is foot ball?"
+        },
+        {
+            "answer": "",
+            "category": "1",
+            "difficulty": 1,
+            "id": 7,
+            "question": ""
+        },
+        {
+            "answer": "",
+            "category": "1",
+            "difficulty": 1,
+            "id": 8,
+            "question": ""
+        },
+        {
+            "answer": "",
+            "category": "1",
+            "difficulty": 1,
+            "id": 9,
+            "question": ""
+        },
+        {
+            "answer": "",
+            "category": "1",
+            "difficulty": 1,
+            "id": 10,
+            "question": ""
+        },
+        {
+            "answer": "yeesss",
+            "category": "health",
+            "difficulty": 1,
+            "id": 13,
+            "question": "what"
+        }
+    ],
+    "total_questions": 16
+}
+
+```
+#### Search for questions
+- Enables the user to search for a question in the game
+
+Method `GET`
+
+Status code `200`
+
+Route `{{Base_url}}/api/search/questions?search=<search_tearm>`
+
+Response
+
+```
+{
+    "questions": [
+        {
+            "answer": "music",
+            "category": "3",
+            "difficulty": 1,
+            "id": 5,
+            "question": "What is music?"
+        }
+    ],
+    "success": true
+}
+
+```
+
+#### Get questions by category
+- Gets questions belonging to a specific category
+
+Method `GET`
+
+Status code `200`
+
+Route `{{Base_url}}/api/categories/<category_id>/questions`
+
+Response 
+
+```
+{
+    [
+        {
+            "answer": "it is football",
+            "category": "1",
+            "difficulty": 1,
+            "id": 18,
+            "question": "what is soccer?"
+        },
+        {
+            "answer": "it is football",
+            "category": "1",
+            "difficulty": 1,
+            "id": 19,
+            "question": "What is soccer"
+        }
+    ],
+    "success": true
+}
+
+```
+
+#### Get all categories
+- Gets all categories
+
+Method `GET`
+
+Status code `200`
+
+Route `{{Base_url}}/api/categories`
+
+Response 
+
+```
+{
+    "categories": [
+        {
+            "id": 1,
+            "type": "history"
+        },
+        {
+            "id": 2,
+            "type": "health"
+        }
+    ]
+}
+
+```
+
+#### Get question to play
+- Gets a question to play
+
+Method `POST`
+
+Status code `200`
+
+Route `{{Base_url}}/api/questions/play`
+
+Request body
+
+```
+{
+	"category": "1",
+	"previous_questions": [ "Who is an athlete?"]
+}
+
+```
+
+Response 
+
+```
+{
+    "question": {
+        "answer": "it is football",
+        "category": "1",
+        "difficulty": 1,
+        "id": 16,
+        "question": "what is soccer?"
+    },
+    "success": true
+}
+
+```
+
+
 ## Tasks
 
 One note before you delve into your tasks: for each endpoint you are expected to define the endpoint and response data. The frontend will be a plentiful resource because it is set up to expect certain endpoints and response data formats already. You should feel free to specify endpoints in your own way; if you do so, make sure to update the frontend or you will get some unexpected behavior. 

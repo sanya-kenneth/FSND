@@ -3,6 +3,10 @@
 {% block content %}
 <div class="row">
 	<div class="col-sm-6">
+	<div class="col-sm-6 col-md-3">
+	<div class="col-md-6"><button class="btn btn-success" id="edit-venue" data-id="{{venue.id}}">Edit</button></div>
+	<div class="col-md-6"><button class="btn btn-danger delete-venue" data-id="{{venue.id}}">Delete</button></div>
+	</div><br><br>
 		<h1 class="monospace">
 			{{ venue.name }}
 		</h1>
@@ -33,7 +37,7 @@
 		<div class="seeking">
 			<p class="lead">Currently seeking talent</p>
 			<div class="description">
-				<i class="fas fa-quote-left"></i> {{ venue.seeking_description }} <i class="fas fa-quote-right"></i>
+				<i class="fas fa-quote-left"></i> {{ venue.seek_description }} <i class="fas fa-quote-right"></i>
 			</div>
 		</div>
 		{% else %}	
@@ -49,31 +53,63 @@
 <section>
 	<h2 class="monospace">{{ venue.upcoming_shows_count }} Upcoming {% if venue.upcoming_shows_count == 1 %}Show{% else %}Shows{% endif %}</h2>
 	<div class="row">
+	{%if venue.upcoming_shows %}
 		{%for show in venue.upcoming_shows %}
 		<div class="col-sm-4">
 			<div class="tile tile-show">
 				<img src="{{ show.artist_image_link }}" alt="Show Artist Image" />
 				<h5><a href="/artists/{{ show.artist_id }}">{{ show.artist_name }}</a></h5>
-				<h6>{{ show.start_time|datetime('full') }}</h6>
+				<h6>{{ show.start_time|date('full') }}</h6>
 			</div>
 		</div>
 		{% endfor %}
+		{%endif%}
 	</div>
 </section>
 <section>
 	<h2 class="monospace">{{ venue.past_shows_count }} Past {% if venue.past_shows_count == 1 %}Show{% else %}Shows{% endif %}</h2>
 	<div class="row">
+	{%if venue.past_shows%}
 		{%for show in venue.past_shows %}
 		<div class="col-sm-4">
 			<div class="tile tile-show">
 				<img src="{{ show.artist_image_link }}" alt="Show Artist Image" />
 				<h5><a href="/artists/{{ show.artist_id }}">{{ show.artist_name }}</a></h5>
-				<h6>{{ show.start_time|datetime('full') }}</h6>
+				<h6>{{ show.start_time|date('full') }}</h6>
 			</div>
 		</div>
 		{% endfor %}
+		{%endif%}
 	</div>
 </section>
 
+{% block javascript %}
+ <script>
+	let del = document.querySelectorAll('.delete-venue');
+	let m;
+	for (m = 0; m < del.length; m++ ) {
+		const delBtn = del[m];
+		delBtn.onclick = (e) => {
+			const venueId = e.target.dataset['id'];
+			fetch('/venues/' + venueId + '/delete', {
+				method: 'DELETE'
+			})
+			.then((response) => {response.json()})
+      		.then((result) => {
+				window.location.href="/"
+			  }
+			)
+		}
+	};
+
+	let editbtn = document.getElementById('edit-venue')
+	editbtn.onclick = (e) => {
+		e.preventDefault()
+		venueId = e.target.dataset['id'];
+		window.location.href="/venues/" + venueId + "/edit";
+	}
+	</script>
+	
+{% endblock %}
 {% endblock %}
 

@@ -12,7 +12,7 @@ class QuestionView extends Component {
       questions: [],
       page: 1,
       totalQuestions: 0,
-      categories: {},
+      categories: [],
       currentCategory: null,
     }
   }
@@ -23,7 +23,7 @@ class QuestionView extends Component {
 
   getQuestions = () => {
     $.ajax({
-      url: `/questions?page=${this.state.page}`, //TODO: update request URL
+      url: `/api/questions?page=${this.state.page}`, //TODO: update request URL
       type: "GET",
       success: (result) => {
         this.setState({
@@ -60,7 +60,7 @@ class QuestionView extends Component {
 
   getByCategory= (id) => {
     $.ajax({
-      url: `/categories/${id}/questions`, //TODO: update request URL
+      url: `/api/categories/${id}/questions`, //TODO: update request URL
       type: "GET",
       success: (result) => {
         this.setState({
@@ -77,17 +77,19 @@ class QuestionView extends Component {
   }
 
   submitSearch = (searchTerm) => {
+    console.log(searchTerm)
     $.ajax({
-      url: `/questions`, //TODO: update request URL
+      url: `/api/search/questions?search=`+searchTerm, //TODO: update request URL
       type: "POST",
       dataType: 'json',
       contentType: 'application/json',
-      data: JSON.stringify({searchTerm: searchTerm}),
+      data: JSON.stringify({search: searchTerm}),
       xhrFields: {
         withCredentials: true
       },
       crossDomain: true,
       success: (result) => {
+        console.log(result)
         this.setState({
           questions: result.questions,
           totalQuestions: result.total_questions,
@@ -105,7 +107,7 @@ class QuestionView extends Component {
     if(action === 'DELETE') {
       if(window.confirm('are you sure you want to delete the question?')) {
         $.ajax({
-          url: `/questions/${id}`, //TODO: update request URL
+          url: `/api/questions/${id}/delete`, //TODO: update request URL
           type: "DELETE",
           success: (result) => {
             this.getQuestions();
@@ -120,17 +122,24 @@ class QuestionView extends Component {
   }
 
   render() {
+    let categoryList = [];
+    if (this.state.categories.length > 0){
+      categoryList = this.state.categories;
+    }
     return (
+      <>
       <div className="question-view">
         <div className="categories-list">
           <h2 onClick={() => {this.getQuestions()}}>Categories</h2>
           <ul>
-            {Object.keys(this.state.categories).map((id, ) => (
-              <li key={id} onClick={() => {this.getByCategory(id)}}>
-                {this.state.categories[id]}
-                <img className="category" src={`${this.state.categories[id]}.svg`}/>
-              </li>
-            ))}
+            {categoryList.map((category) => (
+                <>
+                <li key={category.id} onClick={() => {this.getByCategory(category.id)}}>
+                <div>{category.type}</div>
+                <img className="category" alt="category" src={`${category.type}.svg`}/>
+                </li>
+                </>
+               ))}
           </ul>
           <Search submitSearch={this.submitSearch}/>
         </div>
@@ -152,6 +161,7 @@ class QuestionView extends Component {
         </div>
 
       </div>
+      </>
     );
   }
 }

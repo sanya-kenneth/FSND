@@ -9,10 +9,10 @@ class QuizView extends Component {
   constructor(props){
     super();
     this.state = {
-        quizCategory: null,
+        quizCategory: "",
         previousQuestions: [], 
         showAnswer: false,
-        categories: {},
+        categories: [],
         numCorrect: 0,
         currentQuestion: {},
         guess: '',
@@ -22,7 +22,7 @@ class QuizView extends Component {
 
   componentDidMount(){
     $.ajax({
-      url: `/categories`, //TODO: update request URL
+      url: `/api/categories`, //TODO: update request URL
       type: "GET",
       success: (result) => {
         this.setState({ categories: result.categories })
@@ -35,8 +35,8 @@ class QuizView extends Component {
     })
   }
 
-  selectCategory = ({type, id=0}) => {
-    this.setState({quizCategory: {type, id}}, this.getNextQuestion)
+  selectCategory = ({type}) => {
+    this.setState({quizCategory: type}, this.getNextQuestion)
   }
 
   handleChange = (event) => {
@@ -45,22 +45,23 @@ class QuizView extends Component {
 
   getNextQuestion = () => {
     const previousQuestions = [...this.state.previousQuestions]
-    if(this.state.currentQuestion.id) { previousQuestions.push(this.state.currentQuestion.id) }
+    if(this.state.currentQuestion.question) { previousQuestions.push(this.state.currentQuestion.question) }
 
     $.ajax({
-      url: '/quizzes', //TODO: update request URL
+      url: '/api/questions/play', //TODO: update request URL
       type: "POST",
       dataType: 'json',
       contentType: 'application/json',
       data: JSON.stringify({
         previous_questions: previousQuestions,
-        quiz_category: this.state.quizCategory
+        category: String(this.state.quizCategory)
       }),
       xhrFields: {
         withCredentials: true
       },
       crossDomain: true,
       success: (result) => {
+        console.log(this.state.quizCategory)
         this.setState({
           showAnswer: false,
           previousQuestions: previousQuestions,
@@ -89,7 +90,7 @@ class QuizView extends Component {
 
   restartGame = () => {
     this.setState({
-      quizCategory: null,
+      quizCategory: "",
       previousQuestions: [], 
       showAnswer: false,
       numCorrect: 0,
@@ -105,14 +106,14 @@ class QuizView extends Component {
               <div className="choose-header">Choose Category</div>
               <div className="category-holder">
                   <div className="play-category" onClick={this.selectCategory}>ALL</div>
-                  {Object.keys(this.state.categories).map(id => {
+                  {this.state.categories.map((category) => {
                   return (
                     <div
-                      key={id}
-                      value={id}
+                      key={category.id}
+                      value={category.id}
                       className="play-category"
-                      onClick={() => this.selectCategory({type:this.state.categories[id], id})}>
-                      {this.state.categories[id]}
+                      onClick={() => this.selectCategory({type:category.id})}>
+                      {category.type}
                     </div>
                   )
                 })}
