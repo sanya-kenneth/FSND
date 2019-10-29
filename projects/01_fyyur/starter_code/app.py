@@ -7,10 +7,10 @@ import dateutil.parser
 import babel
 from flask import Flask, render_template, request, Response, flash, redirect, url_for
 from flask_moment import Moment
-from flask_sqlalchemy import SQLAlchemy
 import logging
 from logging import Formatter, FileHandler
 from flask_wtf import Form
+from flask_migrate import Migrate
 from forms import *
 from models import db, Venue, Artist
 #----------------------------------------------------------------------------#
@@ -20,7 +20,8 @@ app = Flask(__name__)
 moment = Moment(app)
 app.config.from_object('config')
 db.init_app(app)
-db.create_all(app=app)
+migrate = Migrate(app, db)
+# db.create_all(app=app)
 # db.drop_all(app=app)
 
 # TODO: connect to a local postgresql database
