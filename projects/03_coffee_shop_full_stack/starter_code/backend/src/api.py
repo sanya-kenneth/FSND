@@ -29,7 +29,6 @@ CORS(app)
         or appropriate status code indicating reason for failure
 '''
 @app.route('/drinks', methods=['GET'])
-@requires_auth(permission='get all drinks')
 def get_drinks():
     drinks = Drink.query.all()
     drinks = [drink.short_rep() for drink in drinks]
@@ -45,13 +44,15 @@ def get_drinks():
     where drinks is the list of drinks
         or appropriate status code indicating reason for failure
 '''
-@app.route('/drinks-detail/<drink_id>', methods=['GET'])
+@app.route('/drinks-detail', methods=['GET'])
 @requires_auth(permission='drink detail')
-def get_drink(drink_id):
-    drink = Drink.query.filter_by(id=drink_id).first()
-    if not drink:
-        abort(404)
-    return jsonify({"success": True, "drink": drink.long_rep()})
+def get_drink():
+    # drink = Drink.query.filter_by(id=drink_id).first()
+    # if not drink:
+        # abort(404)
+    drinks = Drink.query.all()
+    drink = [drink.long_rep() for drink in drinks]
+    return jsonify({"success": True, "drinks": drink})
 
 
 '''
