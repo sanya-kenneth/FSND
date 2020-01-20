@@ -1,0 +1,1 @@
+web: gunicorn --pythonpath projects/capstone/starter run:APP
